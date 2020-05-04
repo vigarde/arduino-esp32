@@ -110,7 +110,15 @@ bool UpdateClass::rollBack(){
     return _partitionIsBootable(partition) && !esp_ota_set_boot_partition(partition);
 }
 
-bool UpdateClass::begin(size_t size, int command, int ledPin, uint8_t ledOn) {
+bool UpdateClass::begin(size_t size) {
+	begin(size, U_FLASH, NULL, -1, LOW);
+}
+
+bool UpdateClass::begin(size_t size, int command, const char *label) {
+	begin(size, command, label, -1, LOW);
+}
+
+bool UpdateClass::begin(size_t size, int command, const char *label, int ledPin, uint8_t ledOn) {
     if(_size > 0){
         log_w("already running");
         return false;
@@ -136,7 +144,7 @@ bool UpdateClass::begin(size_t size, int command, int ledPin, uint8_t ledOn) {
         log_d("OTA Partition: %s", _partition->label);
     }
     else if (command == U_SPIFFS) {
-        _partition = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_SPIFFS, NULL);
+        _partition = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_SPIFFS, label);
         if(!_partition){
             _error = UPDATE_ERROR_NO_PARTITION;
             return false;
